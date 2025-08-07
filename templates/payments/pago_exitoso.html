@@ -1,0 +1,150 @@
+{% extends 'base.html' %}
+
+{% block title %}Pago Registrado{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card border-0 shadow-lg animated-card">
+                <div class="card-header bg-success text-white text-center py-4">
+                    <h3 class="mb-0">
+                        <i class="fas fa-check-circle fa-2x mb-3"></i><br>
+                        Pago Registrado Exitosamente
+                    </h3>
+                </div>
+                <div class="card-body p-5">
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-success alert-dismissible fade show mb-4 animated-alert" role="alert">
+                                <div class="d-flex align-items-center">
+                                    <div class="flex-shrink-0">
+                                        <i class="fas fa-check-circle fa-2x me-3"></i>
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <h5 class="alert-heading">¡Transacción completada!</h5>
+                                        <p class="mb-0">{{ message }}</p>
+                                    </div>
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="alert alert-success mb-4 animated-alert" role="alert">
+                            <div class="d-flex align-items-center">
+                                <div class="flex-shrink-0">
+                                    <i class="fas fa-check-circle fa-2x me-3 pulsing-icon"></i>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <h5 class="alert-heading">¡Transacción completada!</h5>
+                                    <p class="mb-0">El pago ha sido registrado exitosamente en el sistema.</p>
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+                    
+                    <div class="text-center mt-4">
+                        <p class="text-muted">¿Qué deseas hacer ahora?</p>
+                        <div class="d-grid gap-2 d-md-block">
+                            <a href="{% url 'registrar_pago' %}" class="btn btn-success me-md-2 button-bounce">
+                                <i class="fas fa-plus-circle"></i> Registrar otro pago
+                            </a>
+                            <a href="{% url 'payment_list' %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-list"></i> Ver lista de pagos
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer bg-light text-center py-3">
+                    <div class="small">
+                        <i class="fas fa-shield-alt"></i> 
+                        Transacción segura y protegida
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .card {
+        border: none;
+        box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.15);
+        transition: all 0.5s ease;
+    }
+    
+    .animated-card {
+        animation: slideInUp 0.6s ease-in-out;
+    }
+    
+    @keyframes slideInUp {
+        0% { opacity: 0; transform: translateY(30px); }
+        100% { opacity: 1; transform: translateY(0); }
+    }
+    
+    .card:hover {
+        transform: translateY(-5px);
+    }
+    
+    .card-header {
+        background: linear-gradient(45deg, #28a745, #20c997);
+        border-bottom: none;
+    }
+    
+    .btn-success {
+        background: linear-gradient(45deg, #28a745, #20c997);
+        border: none;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-success:hover {
+        background: linear-gradient(45deg, #218838, #1e7e34);
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(40, 167, 69, 0.4);
+    }
+    
+    .animated-alert {
+        animation: fadeInRight 0.8s ease-in-out;
+    }
+    
+    @keyframes fadeInRight {
+        0% { opacity: 0; transform: translateX(-20px); }
+        100% { opacity: 1; transform: translateX(0); }
+    }
+    
+    .alert-success {
+        border-left: 5px solid #28a745;
+        background-color: rgba(40, 167, 69, 0.05);
+        color: #155724;
+    }
+    
+    .alert-success i {
+        color: #28a745;
+    }
+    
+    .pulsing-icon {
+        animation: pulse 1.5s infinite ease-in-out alternate;
+    }
+    
+    @keyframes pulse {
+        0% { transform: scale(0.8); opacity: 0.7; }
+        100% { transform: scale(1.1); opacity: 1; }
+    }
+    
+    .button-bounce {
+        animation: bounce 2s infinite;
+    }
+    
+    @keyframes bounce {
+        0%, 20%, 50%, 80%, 100% {transform: translateY(0);}
+        40% {transform: translateY(-10px);}
+        60% {transform: translateY(-5px);}
+    }
+    
+    .fa-check-circle {
+        color: #28a745;
+    }
+</style>
+{% endblock %}

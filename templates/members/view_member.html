@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Detalles del Miembro{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-lg border-0 rounded-lg">
+                <div class="card-header bg-info text-white">
+                    <h3 class="mb-0">
+                        <i class="fas fa-user me-2"></i>Detalles del Miembro
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5 class="text-muted">Información Personal</h5>
+                            <dl class="row">
+                                <dt class="col-sm-4">Nombre</dt>
+                                <dd class="col-sm-8">{{ member.nombre }} {{ member.apellido }}</dd>
+                                
+                                <dt class="col-sm-4">Edad</dt>
+                                <dd class="col-sm-8">{{ member.edad }} años</dd>
+                                
+                                <dt class="col-sm-4">Sexo</dt>
+                                <dd class="col-sm-8">{{ member.get_sexo_display }}</dd>
+                                
+                                <dt class="col-sm-4">Teléfono</dt>
+                                <dd class="col-sm-8">{{ member.telefono }}</dd>
+                            </dl>
+                        </div>
+                        <div class="col-md-6">
+                            <h5 class="text-muted">Información de Membresía</h5>
+                            <dl class="row">
+                                <dt class="col-sm-4">Plan Actual</dt>
+                                <dd class="col-sm-8">
+                                    {% if member.plan %}
+                                        <span class="badge bg-success">{{ member.plan.name }}</span>
+                                    {% else %}
+                                        <span class="badge bg-warning">Sin plan</span>
+                                    {% endif %}
+                                </dd>
+                                
+                                <dt class="col-sm-4">Fecha Inscripción</dt>
+                                <dd class="col-sm-8">{{ member.fecha_inscripcion|date:"d/m/Y" }}</dd>
+                            </dl>
+                        </div>
+                    </div>
+
+                    {% if member.alergia %}
+                    <div class="alert alert-warning mt-3">
+                        <h5 class="alert-heading"><i class="fas fa-exclamation-triangle me-2"></i>Información Médica</h5>
+                        <p class="mb-0">{{ member.descripcion_alergia }}</p>
+                    </div>
+                    {% endif %}
+
+                    {% if member.observaciones %}
+                    <div class="mt-4">
+                        <h5 class="text-muted">Observaciones</h5>
+                        <p>{{ member.observaciones }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="card-footer bg-light d-flex justify-content-between">
+                    <a href="{% url 'member_list' %}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>Volver
+                    </a>
+                    <a href="{% url 'edit_member' member.id %}" class="btn btn-warning">
+                        <i class="fas fa-edit me-2"></i>Editar
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_css %}
+<style>
+    .card {
+        border: none;
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    }
+    .card-header {
+        background: linear-gradient(45deg, #17a2b8, #138496);
+        border-bottom: none;
+        padding: 1.5rem;
+    }
+    dl {
+        margin-bottom: 0;
+    }
+    dt {
+        font-weight: 600;
+        color: #6c757d;
+    }
+    dd {
+        margin-bottom: 0.5rem;
+    }
+    .badge {
+        font-size: 0.9em;
+        padding: 0.5em 1em;
+    }
+</style>
+{% endblock %}
+{% endblock %}

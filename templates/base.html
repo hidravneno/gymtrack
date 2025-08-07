@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>GymTrack</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap 5 CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(45deg, #222222, #000000);
+            --primary-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        /* Navbar Styling */
+        .custom-navbar {
+            background: var(--primary-gradient) !important;
+            padding: 0.8rem 1rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            border-bottom: none;
+        }
+        
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.5rem;
+            position: relative;
+            padding-left: 15px;
+        }
+        
+        .navbar-brand::after {
+            content: "";
+            position: absolute;
+            height: 70%;
+            width: 3px;
+            background-color: rgba(255, 255, 255, 0.7);
+            left: 0;
+            top: 15%;
+            border-radius: 3px;
+        }
+        
+        .navbar-brand i {
+            filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.6));
+            margin-right: 5px;
+        }
+        
+        .nav-item {
+            position: relative;
+            margin: 0 2px;
+        }
+        
+        .nav-link {
+            padding: 0.8rem 1rem !important;
+            position: relative;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+        
+        .nav-link i {
+            margin-right: 7px;
+            font-size: 1.1em;
+            transition: transform 0.3s ease;
+        }
+        
+        .nav-link:hover i {
+            transform: translateY(-2px);
+        }
+        
+        .nav-item::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 3px;
+            background: #ffffff;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            transition: width 0.3s ease;
+            border-radius: 3px;
+        }
+        
+        .nav-item:hover::after {
+            width: 80%;
+        }
+        
+        .dropdown-menu {
+            border: none;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            border-radius: 0.5rem;
+            margin-top: 0.5rem;
+            animation: fadeIn 0.3s ease;
+            border-top: 3px solid #333333;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .dropdown-item {
+            padding: 0.7rem 1.5rem;
+            font-weight: 500;
+            transition: all 0.2s;
+            position: relative;
+        }
+        
+        .dropdown-item i {
+            margin-right: 10px;
+            color: #333333;
+            transition: transform 0.2s;
+        }
+        
+        .dropdown-item:hover i {
+            transform: translateX(3px);
+        }
+        
+        .dropdown-item:hover {
+            background-color: rgba(0, 0, 0, 0.05);
+            color: #000000;
+        }
+        
+        .navbar-toggler {
+            border: none;
+            padding: 0.5rem 0.75rem;
+            border-radius: 5px;
+            transition: all 0.3s;
+        }
+        
+        .navbar-toggler:focus {
+            box-shadow: none;
+            outline: none;
+        }
+        
+        .admin-link {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 0.4rem 1rem !important;
+            margin-left: 10px;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .admin-link:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+        }
+        
+        .fa-spin-hover:hover {
+            animation: fa-spin 2s infinite linear;
+        }
+        
+        @keyframes fa-spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(359deg); }
+        }
+    </style>
+
+    {% block extra_head %}{% endblock %}
+</head>
+<body class="bg-light">
+
+    <nav class="navbar navbar-expand-lg navbar-dark custom-navbar mb-4">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="{% url 'home' %}">
+            <i class="fas fa-dumbbell"></i> GymTrack
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav me-auto">
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                <i class="fas fa-users"></i> Miembros
+              </a>
+              <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="{% url 'add_member' %}"><i class="fas fa-user-plus"></i>Agregar Miembro</a></li>
+                <li><a class="dropdown-item" href="{% url 'member_list' %}"><i class="fas fa-list"></i>Lista de Miembros</a></li>
+              </ul>
+            </li>
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                <i class="fas fa-credit-card"></i> Pagos
+              </a>
+              <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="/payments/registrar/"><i class="fas fa-hand-holding-usd"></i>Registrar Pago</a></li>
+                <li><a class="dropdown-item" href="/payments/"><i class="fas fa-receipt"></i>Ver Pagos</a></li>
+              </ul>
+            </li>
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                <i class="fas fa-check-circle"></i> Asistencia
+              </a>
+              <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="/attendance/registrar/"><i class="fas fa-clipboard-check"></i>Registrar Asistencia</a></li>
+                <li><a class="dropdown-item" href="/attendance/"><i class="fas fa-calendar-check"></i>Ver Asistencias</a></li>
+              </ul>
+            </li>
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                <i class="fas fa-chart-line"></i> Reportes
+              </a>
+              <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="{% url 'reports_dashboard' %}"><i class="fas fa-tachometer-alt"></i>Dashboard</a></li>
+                <li><a class="dropdown-item" href="{% url 'member_reports' %}"><i class="fas fa-user-friends"></i>Miembros</a></li>
+                <li><a class="dropdown-item" href="{% url 'payment_reports' %}"><i class="fas fa-money-bill-wave"></i>Pagos</a></li>
+                <li><a class="dropdown-item" href="{% url 'attendance_reports' %}"><i class="fas fa-clipboard"></i>Asistencias</a></li>
+              </ul>
+            </li>
+          </ul>
+          <ul class="navbar-nav">
+            <li class="nav-item">
+              <a class="nav-link admin-link" href="/admin/">
+                <i class="fas fa-cog fa-spin-hover"></i> Admin
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container">
+        {% block content %}
+        {% endblock %}
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Resaltar el ítem activo del menú basado en la URL actual
+        document.addEventListener('DOMContentLoaded', function() {
+            const currentUrl = window.location.pathname;
+            
+            // Funciones para detectar la página actual
+            function isHome() { return currentUrl === '/' || currentUrl === '/home/'; }
+            function isMembersSection() { return currentUrl.includes('/member'); }
+            function isPaymentsSection() { return currentUrl.includes('/payment'); }
+            function isAttendanceSection() { return currentUrl.includes('/attendance'); }
+            function isReportsSection() { return currentUrl.includes('/reports'); }
+            
+            // Aplicar clase 'active' al elemento del menú correspondiente
+            const navItems = document.querySelectorAll('.nav-item');
+            
+            if (isHome()) {
+                document.querySelector('.navbar-brand').classList.add('active-brand');
+            } else if (isMembersSection()) {
+                navItems[0].classList.add('active-item');
+            } else if (isPaymentsSection()) {
+                navItems[1].classList.add('active-item');
+            } else if (isAttendanceSection()) {
+                navItems[2].classList.add('active-item');
+            } else if (isReportsSection()) {
+                navItems[3].classList.add('active-item');
+            }
+            
+            // Efecto visual para los enlaces del menú
+            const dropdownItems = document.querySelectorAll('.dropdown-item');
+            dropdownItems.forEach(item => {
+                item.addEventListener('mouseenter', function() {
+                    const icon = this.querySelector('i');
+                    if (icon) {
+                        icon.style.transform = 'translateX(3px)';
+                    }
+                });
+                
+                item.addEventListener('mouseleave', function() {
+                    const icon = this.querySelector('i');
+                    if (icon) {
+                        icon.style.transform = '';
+                    }
+                });
+            });
+        });
+    </script>
+    
+    <style>
+        /* Estilos adicionales para el menú activo */
+        .active-item::after {
+            width: 80% !important;
+            background: #f8f8f8 !important;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+        }
+        
+        .active-item > .nav-link {
+            font-weight: 700;
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .active-brand {
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+            position: relative;
+        }
+        
+        .active-brand::before {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            height: 3px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 3px;
+        }
+        
+        /* Efecto de transición de página */
+        body {
+            animation: fadeInPage 0.3s ease-in-out;
+        }
+        
+        @keyframes fadeInPage {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+    </style>
+</body>
+</html>

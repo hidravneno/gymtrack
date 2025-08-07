@@ -1,0 +1,322 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Panel de Reportes{% endblock %}
+
+{% block extra_head %}
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+    .stats-card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        border: none;
+    }
+    .stats-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    }
+    .stats-card .card-body {
+        display: flex;
+        align-items: center;
+        padding: 1.5rem;
+    }
+    .stats-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 1rem;
+        flex-shrink: 0;
+    }
+    .stats-icon i {
+        font-size: 1.5rem;
+        color: white;
+    }
+    .stats-info h3 {
+        margin-bottom: 0.25rem;
+        font-weight: bold;
+    }
+    .stats-info p {
+        margin-bottom: 0;
+        color: #6c757d;
+    }
+    .chart-container {
+        position: relative;
+        margin: auto;
+        height: 300px;
+    }
+    .chart-title {
+        border-left: 4px solid #007bff;
+        padding-left: 10px;
+        margin-bottom: 1rem;
+        font-weight: 600;
+    }
+    .bg-gradient-primary {
+        background: linear-gradient(45deg, #007bff, #0056b3);
+    }
+    .bg-gradient-success {
+        background: linear-gradient(45deg, #28a745, #20c997);
+    }
+    .bg-gradient-info {
+        background: linear-gradient(45deg, #17a2b8, #138496);
+    }
+    .bg-gradient-warning {
+        background: linear-gradient(45deg, #ffc107, #ffdb4d);
+    }
+    .report-nav {
+        background-color: #f8f9fa;
+        border-radius: 0.5rem;
+        padding: 0.5rem;
+        margin-bottom: 2rem;
+    }
+    .report-nav a {
+        color: #495057;
+        padding: 0.5rem 1rem;
+        border-radius: 0.25rem;
+        text-decoration: none;
+        transition: all 0.3s ease;
+    }
+    .report-nav a:hover, .report-nav a.active {
+        background-color: #007bff;
+        color: white;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="mb-3">Panel de Reportes</h1>
+            <div class="report-nav d-flex justify-content-start align-items-center gap-2">
+                <a href="{% url 'reports_dashboard' %}" class="active">
+                    <i class="fas fa-tachometer-alt me-1"></i> Dashboard
+                </a>
+                <a href="{% url 'member_reports' %}">
+                    <i class="fas fa-users me-1"></i> Miembros
+                </a>
+                <a href="{% url 'payment_reports' %}">
+                    <i class="fas fa-money-bill-wave me-1"></i> Pagos
+                </a>
+                <a href="{% url 'attendance_reports' %}">
+                    <i class="fas fa-clipboard-check me-1"></i> Asistencias
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card stats-card">
+                <div class="card-body">
+                    <div class="stats-icon bg-gradient-primary">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="stats-info">
+                        <h3>{{ total_members }}</h3>
+                        <p>Total Miembros</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card stats-card">
+                <div class="card-body">
+                    <div class="stats-icon bg-gradient-success">
+                        <i class="fas fa-user-check"></i>
+                    </div>
+                    <div class="stats-info">
+                        <h3>{{ active_members }}</h3>
+                        <p>Miembros Activos</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card stats-card">
+                <div class="card-body">
+                    <div class="stats-icon bg-gradient-info">
+                        <i class="fas fa-clipboard-check"></i>
+                    </div>
+                    <div class="stats-info">
+                        <h3>{{ attendance_today }}</h3>
+                        <p>Asistencias Hoy</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card stats-card">
+                <div class="card-body">
+                    <div class="stats-icon bg-gradient-warning">
+                        <i class="fas fa-dollar-sign"></i>
+                    </div>
+                    <div class="stats-info">
+                        <h3>${{ payments_today|floatformat:2 }}</h3>
+                        <p>Pagos Hoy</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="row mb-4">
+        <div class="col-xl-6 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title chart-title">Asistencias Últimos 30 Días</h5>
+                    <div class="chart-container">
+                        <canvas id="attendanceChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-6 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title chart-title">Pagos Últimos 30 Días</h5>
+                    <div class="chart-container">
+                        <canvas id="paymentsChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Additional Stats Row -->
+    <div class="row">
+        <div class="col-xl-4 col-md-6 mb-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <h5 class="card-title chart-title">Resumen Mensual</h5>
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <tr>
+                                <td>Nuevos miembros este mes</td>
+                                <td class="text-end"><strong>{{ members_this_month }}</strong></td>
+                            </tr>
+                            <tr>
+                                <td>Asistencias este mes</td>
+                                <td class="text-end"><strong>{{ attendance_this_month }}</strong></td>
+                            </tr>
+                            <tr>
+                                <td>Ingresos este mes</td>
+                                <td class="text-end"><strong>${{ payments_this_month|floatformat:2 }}</strong></td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-8 col-md-6 mb-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <h5 class="card-title chart-title">Información Útil</h5>
+                    <p>Este panel de reportes ofrece una vista general del rendimiento de tu gimnasio. Puedes ver estadísticas detalladas usando las pestañas en la parte superior:</p>
+                    <div class="row mt-3">
+                        <div class="col-md-4 mb-3">
+                            <a href="{% url 'member_reports' %}" class="btn btn-outline-primary w-100">
+                                <i class="fas fa-users me-1"></i> Análisis de Miembros
+                            </a>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <a href="{% url 'payment_reports' %}" class="btn btn-outline-success w-100">
+                                <i class="fas fa-chart-line me-1"></i> Análisis de Pagos
+                            </a>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <a href="{% url 'attendance_reports' %}" class="btn btn-outline-info w-100">
+                                <i class="fas fa-clipboard-list me-1"></i> Análisis de Asistencias
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Datos para el gráfico de asistencias
+    const attendanceCtx = document.getElementById('attendanceChart').getContext('2d');
+    const attendanceData = {
+        labels: [{% for item in attendance_data %}'{{ item.date }}'{% if not forloop.last %}, {% endif %}{% endfor %}],
+        datasets: [{
+            label: 'Asistencias',
+            data: [{% for item in attendance_data %}{{ item.count }}{% if not forloop.last %}, {% endif %}{% endfor %}],
+            backgroundColor: 'rgba(23, 162, 184, 0.2)',
+            borderColor: 'rgba(23, 162, 184, 1)',
+            borderWidth: 2,
+            tension: 0.3,
+            pointRadius: 3
+        }]
+    };
+
+    new Chart(attendanceCtx, {
+        type: 'line',
+        data: attendanceData,
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        precision: 0
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'top'
+                }
+            }
+        }
+    });
+
+    // Datos para el gráfico de pagos
+    const paymentsCtx = document.getElementById('paymentsChart').getContext('2d');
+    const paymentsData = {
+        labels: [{% for item in payment_data %}'{{ item.date }}'{% if not forloop.last %}, {% endif %}{% endfor %}],
+        datasets: [{
+            label: 'Pagos ($)',
+            data: [{% for item in payment_data %}{{ item.amount }}{% if not forloop.last %}, {% endif %}{% endfor %}],
+            backgroundColor: 'rgba(40, 167, 69, 0.2)',
+            borderColor: 'rgba(40, 167, 69, 1)',
+            borderWidth: 2,
+            tension: 0.3,
+            pointRadius: 3
+        }]
+    };
+
+    new Chart(paymentsCtx, {
+        type: 'line',
+        data: paymentsData,
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            },
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'top'
+                }
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

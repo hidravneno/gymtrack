@@ -1,0 +1,204 @@
+{% extends 'base.html' %}
+
+{% block title %}Ticket de Pago{% endblock %}
+
+{% block extra_head %}
+<style>
+    @media print {
+        body * {
+            visibility: hidden;
+        }
+        #ticket-section, #ticket-section * {
+            visibility: visible;
+        }
+        #ticket-section {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+        }
+        .ticket {
+            width: 58mm !important;
+            max-width: 58mm !important;
+            font-size: 10px !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            border: none !important;
+            box-shadow: none !important;
+        }
+        .ticket-header h4 {
+            font-size: 14px !important;
+            margin-bottom: 5px !important;
+        }
+        .ticket-header p {
+            margin: 2px 0 !important;
+        }
+        .ticket-item {
+            margin-bottom: 2px !important;
+        }
+        .no-print {
+            display: none !important;
+        }
+    }
+    
+    .ticket {
+        font-family: 'Courier New', Courier, monospace;
+        width: 58mm;
+        max-width: 58mm;
+        margin: 0 auto;
+        padding: 5px;
+        border: 1px solid #ddd;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        font-size: 10px;
+    }
+    
+    .ticket-header {
+        text-align: center;
+        border-bottom: 1px dashed #000;
+        padding-bottom: 5px;
+        margin-bottom: 5px;
+    }
+    
+    .ticket-header h4 {
+        font-size: 14px;
+        margin: 0 0 3px 0;
+    }
+    
+    .ticket-header p {
+        margin: 2px 0;
+        font-size: 10px;
+    }
+    
+    .ticket-body {
+        margin-bottom: 10px;
+    }
+    
+    .ticket-footer {
+        text-align: center;
+        border-top: 1px dashed #000;
+        padding-top: 5px;
+        font-size: 8px;
+    }
+    
+    .ticket-item {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 2px;
+        font-size: 10px;
+        white-space: nowrap;
+    }
+    
+    .ticket-total {
+        font-weight: bold;
+        border-top: 1px solid #000;
+        padding-top: 3px;
+        margin-top: 3px;
+    }
+    
+    .ticket-item span {
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    
+    .ticket-item span:first-child {
+        max-width: 40%;
+        flex-shrink: 0;
+    }
+    
+    .ticket-item span:last-child {
+        max-width: 60%;
+        text-align: right;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Ticket de Pago</h5>
+                    <button class="btn btn-sm btn-light no-print" onclick="window.print()">
+                        <i class="fas fa-print"></i> Imprimir Ahora
+                    </button>
+                </div>
+                <div class="card-body" id="ticket-section">
+                    <div class="ticket">
+                        <div class="ticket-header">
+                            <h4>GymTrack</h4>
+                            <p>Comprobante de Pago</p>
+                            <p>{{ payment.date|date:"d/m/Y H:i" }}</p>
+                            <p>--------------------------------</p>
+                        </div>
+                        
+                        <div class="ticket-body">
+                            <div class="ticket-item">
+                                <span>Recibo #:</span>
+                                <span>{{ payment.id }}</span>
+                            </div>
+                            <div class="ticket-item">
+                                <span>Miembro:</span>
+                                <span>{{ payment.member }}</span>
+                            </div>
+                            <div class="ticket-item">
+                                <span>Plan:</span>
+                                <span>{{ payment.plan.name }}</span>
+                            </div>
+                            <div class="ticket-item">
+                                <span>Duración:</span>
+                                <span>{{ payment.plan.duration_days }} días</span>
+                            </div>
+                            <div class="ticket-item">
+                                <span>Pago:</span>
+                                <span>{{ payment.get_payment_type_display }}</span>
+                            </div>
+                            {% if payment.notes %}
+                            <div class="ticket-item">
+                                <span>Notas:</span>
+                                <span>{{ payment.notes|truncatechars:15 }}</span>
+                            </div>
+                            {% endif %}
+                            <div class="ticket-item ticket-total">
+                                <span>Total:</span>
+                                <span>${{ payment.amount }}</span>
+                            </div>
+                        </div>
+                        
+                        <div class="ticket-footer">
+                            <p>--------------------------------</p>
+                            <p>¡Gracias por su pago!</p>
+                            <p>Comprobante válido como recibo</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer no-print">
+                    <a href="{% url 'payment_list' %}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Volver a la lista de pagos
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Auto-print cuando la página termine de cargar
+    window.addEventListener('load', function() {
+        // Esperar un breve momento para que el contenido esté completamente renderizado
+        setTimeout(function() {
+            // Configurar opciones de impresión para POS-58
+            const mediaQueryList = window.matchMedia('print');
+            mediaQueryList.addListener(function(mql) {
+                if (mql.matches) {
+                    document.body.style.width = '58mm';
+                    document.body.style.margin = '0';
+                    document.body.style.padding = '0';
+                }
+            });
+            // Opcional: Descomentar esta línea para impresión automática
+            // window.print();
+        }, 500);
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Lista de Pagos</h2>
+        <a href="{% url 'registrar_pago' %}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Registrar Nuevo Pago
+        </a>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Miembro</th>
+                            <th>Monto</th>
+                            <th>Tipo de Pago</th>
+                            <th>Notas</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for payment in payments %}
+                        <tr>
+                            <td>{{ payment.date|date:"d/m/Y" }}</td>
+                            <td>{{ payment.member }}</td>
+                            <td>${{ payment.amount }}</td>
+                            <td>{{ payment.get_payment_type_display }}</td>
+                            <td>{{ payment.notes|default:"-" }}</td>
+                            <td>
+                                <a href="{% url 'imprimir_ticket' payment.id %}" class="btn btn-sm btn-outline-primary" target="_blank">
+                                    <i class="fas fa-print"></i> Imprimir
+                                </a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center">No hay pagos registrados</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

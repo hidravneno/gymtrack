@@ -1,0 +1,157 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Header Section -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="mb-0">
+                <i class="fas fa-users"></i> Lista de Miembros
+            </h2>
+            <p class="text-muted">Gestiona los miembros del gimnasio</p>
+        </div>
+        <a href="{% url 'add_member' %}" class="btn btn-primary">
+            <i class="fas fa-user-plus"></i> Agregar Nuevo Miembro
+        </a>
+    </div>
+
+    <!-- Search and Filter Section -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <div class="input-group">
+                        <span class="input-group-text bg-primary text-white">
+                            <i class="fas fa-search"></i>
+                        </span>
+                        <input type="text" class="form-control" id="searchInput" placeholder="Buscar miembro...">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Members Table Section -->
+    <div class="card shadow-sm">
+        <div class="card-body">
+            {% if members %}
+            <div class="table-responsive">
+                <table class="table table-hover align-middle" id="membersTable">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Nombre Completo</th>
+                            <th>Teléfono</th>
+                            <th>Edad</th>
+                            <th>Plan</th>
+                            <th>Estado</th>
+                            <th class="text-end">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for member in members %}
+                        <tr>
+                            <td>{{ member.nombre }} {{ member.apellido }}</td>
+                            <td>{{ member.telefono }}</td>
+                            <td>{{ member.edad }}</td>
+                            <td>{{ member.plan|default:"Sin plan" }}</td>
+                            <td>
+                                <span class="badge {% if member.plan %}bg-success{% else %}bg-warning text-dark{% endif %}">
+                                    {% if member.plan %}Activo{% else %}Sin Plan{% endif %}
+                                </span>
+                            </td>
+                            <td class="text-end">
+                                <div class="btn-group">
+                                    <a href="{% url 'view_member' member.id %}" class="btn btn-sm btn-outline-info">
+                                        <i class="fas fa-eye"></i> Ver
+                                    </a>
+                                    <a href="{% url 'edit_member' member.id %}" class="btn btn-sm btn-outline-warning">
+                                        <i class="fas fa-edit"></i> Editar
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center py-4">
+                                <div class="text-muted">
+                                    <i class="fas fa-users fa-2x mb-3"></i>
+                                    <p>No hay miembros registrados.</p>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-5">
+                <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                <h4>No hay miembros registrados</h4>
+                <p class="text-muted">Comienza agregando un nuevo miembro al gimnasio</p>
+                <a href="{% url 'add_member' %}" class="btn btn-primary">
+                    <i class="fas fa-user-plus"></i> Agregar Primer Miembro
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    {% if members %}
+    <div class="row mt-4">
+        <div class="col-md-4">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title mb-0">Total Miembros</h6>
+                            <h2 class="mt-2 mb-0">{{ members|length }}</h2>
+                        </div>
+                        <i class="fas fa-users fa-2x opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('searchInput');
+    const table = document.getElementById('membersTable');
+    
+    if (searchInput && table) {
+        searchInput.addEventListener('input', function() {
+            const searchText = this.value.toLowerCase();
+            const rows = table.querySelectorAll('tbody tr');
+            
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(searchText) ? '' : 'none';
+            });
+        });
+    }
+});
+</script>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .avatar {
+        font-size: 14px;
+        font-weight: bold;
+    }
+    .table > :not(caption) > * > * {
+        padding: 1rem 0.75rem;
+    }
+    .badge {
+        font-weight: 500;
+    }
+    .btn-group {
+        box-shadow: none;
+    }
+</style>
+{% endblock %}
+{% endblock %}

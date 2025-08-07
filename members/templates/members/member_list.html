@@ -1,0 +1,126 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">Lista de Miembros</h2>
+    
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div class="d-flex gap-2">
+            <a href="{% url 'add_member' %}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Agregar Nuevo Miembro
+            </a>
+        </div>
+        <div class="d-flex gap-2">
+            <input type="text" id="searchInput" class="form-control" placeholder="Buscar miembro...">
+        </div>
+    </div>
+
+    {% if messages %}
+    <div class="messages mb-4">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle" id="membersTable">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Nombre Completo</th>
+                            <th>Teléfono</th>
+                            <th>Edad</th>
+                            <th>Plan</th>
+                            <th>Estado</th>
+                            <th class="text-end">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for member in members %}
+                        <tr>
+                            <td>{{ member.nombre }} {{ member.apellido }}</td>
+                            <td>{{ member.telefono }}</td>
+                            <td>{{ member.edad }}</td>
+                            <td>{{ member.plan|default:"Sin plan" }}</td>
+                            <td>
+                                <span class="badge {% if member.plan %}bg-success{% else %}bg-warning text-dark{% endif %}">
+                                    {% if member.plan %}Activo{% else %}Sin Plan{% endif %}
+                                </span>
+                            </td>
+                            <td class="text-end">
+                                <div class="btn-group">
+                                    <a href="{% url 'view_member' member.id %}" class="btn btn-sm btn-outline-info">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="{% url 'edit_member' member.id %}" class="btn btn-sm btn-outline-warning">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center py-4">
+                                <div class="text-muted">
+                                    <i class="fas fa-users fa-2x mb-3"></i>
+                                    <p>No hay miembros registrados.</p>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_css %}
+<style>
+.table > :not(caption) > * > * {
+    padding: 1rem 0.75rem;
+}
+.badge {
+    font-weight: 500;
+    padding: 0.5em 0.75em;
+}
+.btn-group {
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+.btn-outline-info:hover, .btn-outline-warning:hover {
+    color: #fff;
+}
+.table-hover tbody tr:hover {
+    background-color: rgba(0,0,0,.02);
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('searchInput');
+    const table = document.getElementById('membersTable');
+    
+    if (searchInput && table) {
+        searchInput.addEventListener('input', function() {
+            const searchText = this.value.toLowerCase();
+            const rows = table.querySelectorAll('tbody tr');
+            
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(searchText) ? '' : 'none';
+            });
+        });
+    }
+});
+</script>
+{% endblock %}
+
+{% endblock %}

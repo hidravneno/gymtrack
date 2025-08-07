@@ -1,0 +1,150 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Registrar Asistencia{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-lg border-0 rounded-lg">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">
+                        <i class="fas fa-clipboard-check me-2"></i>Registrar Asistencia
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info" role="alert">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Selecciona el miembro que está ingresando al gimnasio
+                    </div>
+                    <div id="processingAlert" style="display: none;" class="alert-container">
+                        <div class="alert alert-primary fade show mb-0">
+                            <div class="d-flex align-items-center">
+                                <div class="spinner-border text-primary me-3" role="status">
+                                    <span class="visually-hidden">Procesando...</span>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <strong>Registrando asistencia...</strong>
+                                    <p class="mb-0">Un momento por favor, estamos procesando la entrada del miembro.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <form method="post" id="attendanceForm">
+                        {% csrf_token %}
+                        {{ form|crispy }}
+                        <div class="text-center mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg px-5">
+                                <i class="fas fa-check me-2"></i>Registrar Asistencia
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                <div class="card-footer text-center py-3">
+                    <a href="{% url 'attendance_list' %}" class="text-decoration-none">
+                        <i class="fas fa-arrow-left me-2"></i>Volver a la lista de asistencias
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_css %}
+<style>
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+    .card {
+        border: none;
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    }
+    .card-header {
+        background: linear-gradient(45deg, #007bff, #0056b3);
+        border-bottom: none;
+        padding: 1.5rem;
+    }
+    .form-control:focus {
+        border-color: #007bff;
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    }
+    .btn-primary {
+        background: linear-gradient(45deg, #007bff, #0056b3);
+        border: none;
+        padding: 0.75rem 2rem;
+        transition: all 0.3s ease;
+    }
+    .btn-primary:hover {
+        background: linear-gradient(45deg, #0056b3, #004085);
+        transform: translateY(-2px);
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    }
+    .alert-info {
+        background-color: #e8f4fd;
+        border-color: #b8e2fc;
+        color: #0c5460;
+    }
+    .card-footer {
+        background: transparent;
+        border-top: 1px solid rgba(0,0,0,0.05);
+    }
+    .card-footer a {
+        color: #6c757d;
+        transition: color 0.3s ease;
+    }
+    .card-footer a:hover {
+        color: #007bff;
+    }
+    .alert-container {
+        animation: fadeIn 0.5s ease-in-out;
+        margin: 1rem 0;
+    }
+    @keyframes fadeIn {
+        0% { opacity: 0; transform: translateY(-10px); }
+        100% { opacity: 1; transform: translateY(0); }
+    }
+    .spinner-border {
+        animation: spin 1s linear infinite, pulse 1s ease-in-out infinite alternate;
+    }
+    @keyframes pulse {
+        0% { transform: scale(0.9); }
+        100% { transform: scale(1.1); }
+    }
+    #processingAlert {
+        border-radius: 8px;
+        overflow: hidden;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const attendanceForm = document.getElementById('attendanceForm');
+    const processingAlert = document.getElementById('processingAlert');
+    
+    // Mostrar alerta al enviar el formulario
+    attendanceForm.addEventListener('submit', function(e) {
+        // Validar que el campo obligatorio esté completo
+        const selectField = attendanceForm.querySelector('select');
+        
+        if (selectField && selectField.value) {
+            // Mostrar la alerta de procesamiento con animación
+            processingAlert.style.display = 'block';
+            
+            // Animar el botón de envío
+            const submitButton = attendanceForm.querySelector('button[type="submit"]');
+            submitButton.disabled = true;
+            submitButton.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Procesando...';
+            
+            // Dejar que el formulario se envíe después de un breve retraso para mostrar la animación
+            setTimeout(() => {
+                return true;
+            }, 500);
+        }
+    });
+});
+</script>
+{% endblock %}
+{% endblock %}

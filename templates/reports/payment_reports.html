@@ -1,0 +1,390 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Reportes de Pagos{% endblock %}
+
+{% block extra_head %}
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+    .stats-card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        border: none;
+    }
+    .stats-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    }
+    .stats-card .card-body {
+        display: flex;
+        align-items: center;
+        padding: 1.5rem;
+    }
+    .stats-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 1rem;
+        flex-shrink: 0;
+    }
+    .stats-icon i {
+        font-size: 1.5rem;
+        color: white;
+    }
+    .stats-info h3 {
+        margin-bottom: 0.25rem;
+        font-weight: bold;
+    }
+    .stats-info p {
+        margin-bottom: 0;
+        color: #6c757d;
+    }
+    .chart-container {
+        position: relative;
+        margin: auto;
+        height: 300px;
+    }
+    .chart-title {
+        border-left: 4px solid #28a745;
+        padding-left: 10px;
+        margin-bottom: 1rem;
+        font-weight: 600;
+    }
+    .bg-gradient-success {
+        background: linear-gradient(45deg, #28a745, #20c997);
+    }
+    .report-nav {
+        background-color: #f8f9fa;
+        border-radius: 0.5rem;
+        padding: 0.5rem;
+        margin-bottom: 2rem;
+    }
+    .report-nav a {
+        color: #495057;
+        padding: 0.5rem 1rem;
+        border-radius: 0.25rem;
+        text-decoration: none;
+        transition: all 0.3s ease;
+    }
+    .report-nav a:hover, .report-nav a.active {
+        background-color: #007bff;
+        color: white;
+    }
+    .filter-form {
+        background-color: #f8f9fa;
+        border-radius: 0.5rem;
+        padding: 1rem;
+        margin-bottom: 2rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="mb-3">Reportes de Pagos</h1>
+            <div class="report-nav d-flex justify-content-start align-items-center gap-2">
+                <a href="{% url 'reports_dashboard' %}">
+                    <i class="fas fa-tachometer-alt me-1"></i> Dashboard
+                </a>
+                <a href="{% url 'member_reports' %}">
+                    <i class="fas fa-users me-1"></i> Miembros
+                </a>
+                <a href="{% url 'payment_reports' %}" class="active">
+                    <i class="fas fa-money-bill-wave me-1"></i> Pagos
+                </a>
+                <a href="{% url 'attendance_reports' %}">
+                    <i class="fas fa-clipboard-check me-1"></i> Asistencias
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter Form -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="filter-form">
+                <form method="get" class="row g-3">
+                    <div class="col-md-4">
+                        <label for="start_date" class="form-label">Fecha Inicio</label>
+                        <input type="date" class="form-control" id="start_date" name="start_date" value="{{ start_date }}">
+                    </div>
+                    <div class="col-md-4">
+                        <label for="end_date" class="form-label">Fecha Fin</label>
+                        <input type="date" class="form-control" id="end_date" name="end_date" value="{{ end_date }}">
+                    </div>
+                    <div class="col-md-4 d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary me-2">Filtrar</button>
+                        <a href="{% url 'payment_reports' %}" class="btn btn-secondary">Limpiar</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row mb-4">
+        <div class="col-md-6 mb-4">
+            <div class="card stats-card">
+                <div class="card-body">
+                    <div class="stats-icon bg-gradient-success">
+                        <i class="fas fa-dollar-sign"></i>
+                    </div>
+                    <div class="stats-info">
+                        <h3>${{ total_amount|floatformat:2 }}</h3>
+                        <p>Total Ingresos</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 mb-4">
+            <div class="card stats-card">
+                <div class="card-body">
+                    <div class="stats-icon bg-gradient-success">
+                        <i class="fas fa-receipt"></i>
+                    </div>
+                    <div class="stats-info">
+                        <h3>{{ payment_count }}</h3>
+                        <p>Cantidad de Pagos</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="row mb-4">
+        <div class="col-xl-6 mb-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <h5 class="card-title chart-title">Pagos por Tipo</h5>
+                    <div class="chart-container">
+                        <canvas id="paymentTypeChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-6 mb-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <h5 class="card-title chart-title">Pagos por Plan</h5>
+                    <div class="chart-container">
+                        <canvas id="planPaymentsChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Monthly Payments Chart -->
+    <div class="row">
+        <div class="col-12 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title chart-title">Pagos Mensuales</h5>
+                    <div class="chart-container">
+                        <canvas id="monthlyPaymentsChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payment Type Details -->
+    <div class="row">
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <h5 class="card-title chart-title">Detalles por Tipo de Pago</h5>
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Tipo de Pago</th>
+                                    <th>Cantidad</th>
+                                    <th>Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in payments_by_type %}
+                                <tr>
+                                    <td>
+                                        {% if item.payment_type == 'efectivo' %}
+                                            Efectivo
+                                        {% elif item.payment_type == 'tarjeta' %}
+                                            Tarjeta de Crédito/Débito
+                                        {% elif item.payment_type == 'transferencia' %}
+                                            Transferencia Bancaria
+                                        {% else %}
+                                            Otro
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ item.count }}</td>
+                                    <td>${{ item.total|floatformat:2 }}</td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="3" class="text-center">No hay datos disponibles</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <h5 class="card-title chart-title">Detalles por Plan</h5>
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Plan</th>
+                                    <th>Cantidad</th>
+                                    <th>Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in payments_by_plan %}
+                                <tr>
+                                    <td>{{ item.plan__name|default:"Sin plan" }}</td>
+                                    <td>{{ item.count }}</td>
+                                    <td>${{ item.total|floatformat:2 }}</td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="3" class="text-center">No hay datos disponibles</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Gráfico de pagos por tipo
+    const paymentTypeCtx = document.getElementById('paymentTypeChart').getContext('2d');
+    const paymentTypeLabels = [];
+    const paymentTypeData = [];
+    
+    {% for item in payments_by_type %}
+        {% if item.payment_type == 'efectivo' %}
+            paymentTypeLabels.push('Efectivo');
+        {% elif item.payment_type == 'tarjeta' %}
+            paymentTypeLabels.push('Tarjeta');
+        {% elif item.payment_type == 'transferencia' %}
+            paymentTypeLabels.push('Transferencia');
+        {% else %}
+            paymentTypeLabels.push('Otro');
+        {% endif %}
+        paymentTypeData.push({{ item.total }});
+    {% endfor %}
+
+    new Chart(paymentTypeCtx, {
+        type: 'doughnut',
+        data: {
+            labels: paymentTypeLabels,
+            datasets: [{
+                data: paymentTypeData,
+                backgroundColor: [
+                    '#28a745', '#007bff', '#ffc107', '#6c757d'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+
+    // Gráfico de pagos por plan
+    const planPaymentsCtx = document.getElementById('planPaymentsChart').getContext('2d');
+    const planLabels = [];
+    const planData = [];
+    
+    {% for item in payments_by_plan %}
+        {% if item.plan__name %}
+            planLabels.push('{{ item.plan__name }}');
+        {% else %}
+            planLabels.push('Sin plan');
+        {% endif %}
+        planData.push({{ item.total }});
+    {% endfor %}
+
+    new Chart(planPaymentsCtx, {
+        type: 'pie',
+        data: {
+            labels: planLabels,
+            datasets: [{
+                data: planData,
+                backgroundColor: [
+                    '#20c997', '#007bff', '#ffc107', '#dc3545', 
+                    '#6f42c1', '#fd7e14', '#17a2b8', '#6c757d'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+
+    // Gráfico de pagos mensuales
+    const monthlyPaymentsCtx = document.getElementById('monthlyPaymentsChart').getContext('2d');
+    
+    new Chart(monthlyPaymentsCtx, {
+        type: 'bar',
+        data: {
+            labels: [{% for item in monthly_payments %}'{{ item.month }}'{% if not forloop.last %}, {% endif %}{% endfor %}],
+            datasets: [{
+                label: 'Pagos Mensuales ($)',
+                data: [{% for item in monthly_payments %}{{ item.amount }}{% if not forloop.last %}, {% endif %}{% endfor %}],
+                backgroundColor: 'rgba(40, 167, 69, 0.2)',
+                borderColor: 'rgba(40, 167, 69, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            },
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'top'
+                }
+            }
+        }
+    });
+});
+</script>
+{% endblock %}
