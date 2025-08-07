@@ -1,4 +1,4 @@
-# GymTrack - Sistema de Gestión para Gimnasios
+# 🏋️‍♂️GymTrack - Sistema de Gestión para Gimnasios
 
 GymTrack es un sistema completo de gestión para gimnasios desarrollado con Django. Permite la administración de miembros, pagos, asistencias y reportes detallados, todo con una interfaz moderna y profesional.
 
