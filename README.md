@@ -21,7 +21,7 @@ GymTrack es un sistema completo de gestión para gimnasios desarrollado con Djan
 
 1. Clonar el repositorio:
    ```
-   git clone https://github.com/tu-usuario/gymtrack.git
+   git clone https://github.com/hidravneno/gymtrack.git
    cd gymtrack
    ```
 
